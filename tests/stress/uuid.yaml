@@ -1,0 +1,13 @@
+execution:
+- concurrency: 5
+  ramp-up: 20s
+  hold-for: 2m
+  scenario: UUID
+ 
+
+scenarios:
+  UUID:
+    default-address: http://localhost:3100/v1
+    requests: 
+      - url: /uuid
+        method: POST
