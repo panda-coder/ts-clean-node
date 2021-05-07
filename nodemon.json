@@ -3,5 +3,5 @@
     "ext": ".ts,.js",
     "ignore": [],
     "delay": "500",
-    "exec": "ts-node -r tsconfig-paths/register ./src/main/server.ts"
+    "exec": "DEBUG=ts-clean* ts-node -r tsconfig-paths/register ./src/main/server.ts"
   }

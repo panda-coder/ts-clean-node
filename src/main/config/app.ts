@@ -1,8 +1,9 @@
 import { env } from './index'
-import { appFactory } from '@/main/factories'
+import { appFactory, makeLogger } from '@/main/factories'
 
 const Application = () => {
-  appFactory[env.FRAMEWORK]()
+
+  appFactory[env.FRAMEWORK](makeLogger(env.APPLICATION_NAME))
 }
 
 export {

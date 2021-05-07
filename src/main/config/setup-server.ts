@@ -1,9 +1,10 @@
+import { ILogger } from '@/shared/contracts';
 import { Server } from 'http'
 import { gracefulShutdown } from '../helpers'
 
 let connections: any[] = [];
 
-const setupServer = (server: Server) => {
+const setupServer = (server: Server, logger: ILogger) => {
   server.on('connection', connection => {
     connections.push(connection);
     connection.on('close', () => connections = connections
@@ -16,7 +17,7 @@ const setupServer = (server: Server) => {
   process.on('SIGINT', gracefulShutdown(server, connections));
   
   setInterval(() => server.getConnections(
-    (err, connections) => console.log(`${connections} connections currently open`)
+    (err, connections) => logger.info(`${connections} connections currently open`)
   ), 5000);
 }
 

@@ -1,9 +1,9 @@
 
 
 export interface ILogger {
-  log: (level: ILogger.LOG_LEVEL, description: ILogger.Description, context: ILogger.Context) => Promise<void>
-  info: (description: ILogger.Description, context: ILogger.Context) => Promise<void>
-  debug: (description: ILogger.Description, context: ILogger.Context) => Promise<void>
+  log: (level: ILogger.LOG_LEVEL, description: ILogger.Description, context?: ILogger.Context) => Promise<void>
+  info: (description: ILogger.Description, context?: ILogger.Context) => Promise<void>
+  debug: (description: ILogger.Description, context?: ILogger.Context) => Promise<void>
 }
 
 export namespace ILogger {

@@ -1,8 +1,8 @@
 import { ILogger } from '@/shared/contracts'
-import { ConsoleLogAdapter } from '@/main/adapters/logger/console-adapter'
+import { DebugLogAdapter } from '@/main/adapters/logger'
 
-const makeLogger = (): ILogger => {
-  return new ConsoleLogAdapter()
+const makeLogger = (title?: string): ILogger => {
+  return new DebugLogAdapter(title || '')
 }
 
 

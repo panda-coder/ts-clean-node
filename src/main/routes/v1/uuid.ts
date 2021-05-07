@@ -1,12 +1,12 @@
 import { Router, Request, Response } from 'express'
-import { HttpContext } from '../../helpers'
 import { makeLogger } from '@/main/factories'
+import { env } from '@/main/config'
 
 export default (router: Router): void => {
-  const logger = makeLogger()
+  const logger = makeLogger(env.APPLICATION_NAME + ':uuid')
 
   router.post('/uuid', (req: Request, res: Response) => {
-    logger.info(req.body, [])
+    logger.info(req.body)
     res.send('ready')
   })
 }
