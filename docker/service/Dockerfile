@@ -8,4 +8,4 @@ COPY . /usr/src/app
 
 RUN npm i
 
-CMD ["npm", "start"]
+CMD ["npm", "run", "dev:watch"]

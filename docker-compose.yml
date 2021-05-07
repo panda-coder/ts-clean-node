@@ -36,8 +36,9 @@ services:
   ts-clean:
     build:
       context: ./
+      dockerfile: ./docker/service/Dockerfile
     ports:
-      - "3000:3000"
+      - "3100:3100"
     volumes:
       - ./:/usr/src/app
     links:
@@ -47,110 +48,52 @@ services:
       options:
         fluentd-address: localhost:24224
         tag: ts-clean-email
+    networks:
+      - backend
 
   fluentd:
-    build: ./fluentd
+    build: ./docker/fluentd
     volumes:
-      - ./fluentd/conf:/fluentd/etc
+      - ./docker/fluentd/conf:/fluentd/etc
     links:
-      - "elasticsearch"
+      - elasticsearch
     ports:
       - "24224:24224"
       - "24224:24224/udp"
-    
+    networks:
+      - frontend
+      - backend
+
+  ### ElasticSearch ########################################
   elasticsearch:
-    image: elasticsearch
-    expose:
-      - 9200
+    build:
+      context: ./docker/elasticsearch
+      args:
+        - ELK_VERSION=${ELK_VERSION}
+    volumes:
+      - elasticsearch:/usr/share/elasticsearch/data
+    environment:
+      - cluster.name=ts-clean-cluster
+      - node.name=ts-clean-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - cluster.initial_master_nodes=ts-clean-node
     ports:
-      - "9200:9200"
+      - "${ELASTICSEARCH_HOST_HTTP_PORT}:9200"
+      - "${ELASTICSEARCH_HOST_TRANSPORT_PORT}:9300"
+    networks:
+      - frontend
+      - backend
 
+  ### Kibana ##############################################
   kibana:
-    image: kibana
-    links:
-      - "elasticsearch"
+    build:
+      context: ./docker/kibana
+      args:
+        - ELK_VERSION=${ELK_VERSION}
     ports:
-      - "5601:5601"
-
-  ### kafka ####################################################
-  kafka:
-    image: wurstmeister/kafka
-    ports:
-      - "9092:9092"
-    environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ADVERTISED_HOST_NAME: 127.0.0.1
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://127.0.0.1:9092
-      KAFKA_MESSAGE_MAX_BYTES: 2000000
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-    volumes:
-      - ${DATA_PATH_HOST}/kafka:/kafka
-      - /var/run/docker.sock:/var/run/docker.sock
+      - "${KIBANA_HTTP_PORT}:5601"
+    depends_on:
+      - elasticsearch
     networks:
+      - frontend
       - backend
-
-  ### kafka-manager ###########################################
-  kafka-manager:
-    image: sheepkiller/kafka-manager
-    ports:
-      - 9020:9000
-    environment:
-      ZK_HOSTS: zookeeper:2181
-    networks:
-      - backend
-
-  ### ZooKeeper #########################################
-  zookeeper:
-    build: ./zookeeper
-    volumes:
-      - ${DATA_PATH_HOST}/zookeeper/data:/data
-      - ${DATA_PATH_HOST}/zookeeper/datalog:/datalog
-    ports:
-      - "${ZOOKEEPER_PORT}:2181"
-    networks:
-      - backend
-
-  ### PostgreSQL ###########################################
-  postgres:
-  build:
-    context: ./postgres
-    args:
-      - POSTGRES_VERSION=${POSTGRES_VERSION}
-  volumes:
-    - ${DATA_PATH_HOST}/postgres:/var/lib/postgresql/data
-    - ${POSTGRES_ENTRYPOINT_INITDB}:/docker-entrypoint-initdb.d
-  ports:
-    - "${POSTGRES_PORT}:5432"
-  environment:
-    - POSTGRES_DB=${POSTGRES_DB}
-    - POSTGRES_USER=${POSTGRES_USER}
-    - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-  networks:
-    - backend
-
-
-  ### MongoDB ##############################################
-  mongo:
-    build: ./mongo
-    ports:
-      - "${MONGODB_PORT}:27017"
-    volumes:
-      - ${DATA_PATH_HOST}/mongo:/data/db
-      - ${DATA_PATH_HOST}/mongo_config:/data/configdb
-    networks:
-      - backend
-
-  ### Docker-in-Docker ################################################
-  docker-in-docker:
-    image: docker:19.03-dind
-    environment:
-      DOCKER_TLS_SAN: DNS:docker-in-docker
-    privileged: true
-    volumes:
-      - ${APP_CODE_PATH_HOST}:${APP_CODE_PATH_CONTAINER}
-      - docker-in-docker:/certs/client
-    expose:
-      - 2375
-    networks:
-      - backend
-  
