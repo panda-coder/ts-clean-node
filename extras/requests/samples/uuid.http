@@ -1,0 +1,7 @@
+POST http://localhost:3100/v1/uuid
+Content-Type: application/json
+
+{
+  "cep": "93046-7532",
+  "endereco": "391 Stroman Fields"
+}
