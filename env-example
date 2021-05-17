@@ -13,5 +13,9 @@ ELASTICSEARCH_HOST_TRANSPORT_PORT=9300
 
 KIBANA_HTTP_PORT=5601
 
+### NATS ##################################################
+
+NATS_VERSION=alpine3.13
+
 ### ELK Stack ##################################################
 ELK_VERSION=7.9.1
