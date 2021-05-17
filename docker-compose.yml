@@ -97,3 +97,12 @@ services:
     networks:
       - frontend
       - backend
+
+  ### Kibana ##############################################
+  nats:
+    build:
+      context: ./docker/nats
+      args:
+        - NATS_VERSION=${NATS_VERSION}
+    networks:
+      - backend
